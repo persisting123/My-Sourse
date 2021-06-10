@@ -1,0 +1,72 @@
+//dij最短路的应用 
+#include<iostream>
+#include<algorithm> 
+#include<cstring>
+using namespace std;
+const int maxn=1e3+10;
+const int INF=0x3f3f3f3f;
+int n,m,s,t;
+int e[maxn][maxn];//记录无向图中某条边的顶点以及权重 
+int vis[maxn];//记录某点是否被访问过 
+int dis[maxn];//记录从出发点到某点的最短距离 
+int num[maxn];//记录从出发点到某点的最短路径数量 
+int w[maxn];//记录从出发点到某点最多能召集的救援队数量 
+int weight[maxn];//各个城市的救援队数量 
+void dij(){
+	memset(vis,0,sizeof(vis));
+	memset(num,0,sizeof(num));
+	memset(w,0,sizeof(w));
+	for(int i=0;i<n;i++){
+		dis[i]=e[s][i]; 
+	}
+	w[s]=weight[s];
+	num[s]=1;
+	for(int i=0;i<n;i++){
+		int min=INF,u=-1;
+		for(int j=0;j<n;j++){
+			if(!vis[j]&&dis[j]<min){
+				min=dis[j];//寻找第一个距离出发点最近的点 
+				u=j;
+			}
+		}
+		if(u==-1) break;
+		vis[u]=1;
+		for(int j=0;j<n;j++){
+			if(!vis[j]&&dis[u]+e[u][j]<dis[j]){//更新最短路径 
+				dis[j]=dis[u]+e[u][j];
+				num[j]=num[u];
+				w[j]=w[u]+weight[j];
+			}
+			else if(!vis[j]&&dis[u]+e[u][j]==dis[j]){//若路径s->u->j与s->j长度相同，则最短路径数量增加 
+				num[j]+=num[u];
+				if(w[u]+weight[j]>w[j]){//更新所能召集的救援队数量 
+					w[j]=w[u]+weight[j];
+				}
+			}
+		}
+	}
+	cout<<num[t]<<" "<<w[t]<<endl;
+} 
+int main()
+{
+	cin>>n>>m>>s>>t;
+	for(int i=0;i<n;i++){
+		cin>>weight[i];
+	}
+	for(int i=0;i<n;i++){//边权重的初始化 
+		for(int j=0;j<n;j++){
+			if(i==j) e[i][j]=0;
+			else e[i][j]=INF;
+		}
+	}
+	for(int i=0;i<m;i++){
+		int u,v,d;
+		cin>>u>>v>>d;
+		if(d<e[u][v]){
+			e[u][v]=d;
+			e[v][u]=d;
+		}
+	}
+	dij();
+	return 0;
+ } 
